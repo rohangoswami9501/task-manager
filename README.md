@@ -1,53 +1,80 @@
-# TaskFlow - Project Management System
+# TaskFlow
 
-TaskFlow is a modern, SaaS-style full-stack application designed for managing projects and tasks seamlessly. It includes role-based access control (Admin/Member), detailed status tracking, filtering, dynamic progress bars, and a fully functional dashboard.
+A full-stack task management application I built to handle project tracking and task delegation. It uses a React frontend with a Node.js/Express backend, backed by MySQL.
+
+## Features
+
+- **RBAC (Role-Based Access Control):** Admins can manage projects, users, and all tasks. Members can only update the statuses of tasks assigned to them.
+- **Project Tracking:** Quick progress bars showing completion rates for individual projects.
+- **Task Filtering:** Easily sort tasks by assignee, project, status, or check for overdue items.
+- **Dashboard:** A clean overview of metrics (total tasks, pending, completed, overdue).
 
 ## Tech Stack
-- **Frontend:** React, Vite, React Router v6, Tailwind CSS v4, Axios
-- **Backend:** Node.js, Express.js, Prisma ORM, JSON Web Tokens (JWT)
-- **Database:** MySQL
 
-## Local Setup Instructions
+- **Client:** React, Vite, React Router, Tailwind CSS
+- **Server:** Node.js, Express
+- **Database:** Prisma ORM, MySQL
+- **Auth:** JWT and bcrypt
 
-### 1. Prerequisites
-- Node.js (v18+)
-- MySQL database (Local or Hosted)
+---
+
+## Running Locally
+
+To get this running on your local machine, you'll need Node.js and a MySQL database (I usually use a free Railway or local instance for testing).
+
+### 1. Clone & Install
+```bash
+git clone https://github.com/rohangoswami9501/task-manager.git
+cd task-manager
+
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+```
 
 ### 2. Environment Variables
-Create a `.env` file inside the `backend` folder:
+
+Create a `.env` file in the `backend` directory:
 ```env
-DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
-JWT_SECRET="your_secure_random_string_here"
 PORT=5000
+DATABASE_URL="mysql://root:password@localhost:3306/taskflow"
+JWT_SECRET="dev_secret_key_change_in_prod"
 FRONTEND_URL="http://localhost:5173"
 ```
 
-Create a `.env` file inside the `frontend` folder:
+Create a `.env` in the `frontend` directory:
 ```env
 VITE_API_URL="http://localhost:5000"
 ```
 
-### 3. Backend Setup
+### 3. Database Setup
+
+Make sure your MySQL database is running and accessible, then sync the Prisma schema:
 ```bash
 cd backend
-npm install
 npx prisma db push
 npx prisma generate
+```
+
+### 4. Start the Dev Servers
+
+Run the backend:
+```bash
+cd backend
 npm start
 ```
-*(The backend server will run on `http://localhost:5000`)*
 
-### 4. Frontend Setup
+Run the frontend (in a new terminal):
 ```bash
 cd frontend
-npm install
 npm run dev
 ```
-*(The frontend will run on `http://localhost:5173`)*
 
-## Features
-- **Authentication:** Secure login and signup with JWT session management.
-- **Role-Based Access Control:** `ADMIN` accounts can create, edit, and delete projects/tasks. `MEMBER` accounts can only view projects and update the status of tasks directly assigned to them.
-- **Interactive Dashboard:** Live counts of pending, in-progress, completed, and overdue tasks.
-- **Projects Page:** View projects alongside their progress bar automatically calculated from task completion statuses.
-- **Tasks Page:** Dynamic table with filtering (by Project, Status, Assignee, Overdue) and status updates.
+The app should now be running on `http://localhost:5173`. 
+
+---
+*Note: To test admin features locally, you can create a user normally through the UI signup flow, then manually change their `role` to `ADMIN` in your MySQL GUI (like TablePlus or DBeaver).*
