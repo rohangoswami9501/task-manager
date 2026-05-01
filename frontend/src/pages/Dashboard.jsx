@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../hooks/useAuth';
+import { isTaskOverdue, formatDisplayDate } from '../utils/dateFormatter';
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -8,17 +10,8 @@ const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Extract userId from token
-  const token = localStorage.getItem('token');
-  let userId = null;
-  if (token) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      userId = payload.userId;
-    } catch (e) {
-      console.error('Failed to parse token');
-    }
-  }
+  const { user } = useAuth();
+  const userId = user?.userId;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,16 +35,7 @@ const Dashboard = () => {
     fetchData();
   }, [userId]);
 
-  const isOverdue = (dueDate, status) => {
-    if (!dueDate || status === 'DONE') return false;
-    return new Date(dueDate) < new Date(new Date().setHours(0, 0, 0, 0));
-  };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'No due date';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -156,9 +140,7 @@ const Dashboard = () => {
             ) : (
               <ul className="space-y-4">
                 {myTasks.slice(0, 5).map(task => {
-                  const overdue = isOverdue(task.dueDate, task.status);
-                  // Find project name based on project ID if we want, but tasks endpoint doesn't include project name by default unless Prisma include was used.
-                  // Since we didn't include project relation in the tasks endpoint, we can map it manually from projects list.
+                  const overdue = isTaskOverdue(task.dueDate, task.status);
                   const project = projects.find(p => p.id === task.projectId);
 
                   return (
@@ -180,7 +162,7 @@ const Dashboard = () => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           )}
-                          <span className="text-xs">{formatDate(task.dueDate)}</span>
+                          <span className="text-xs">{formatDisplayDate(task.dueDate, 'No due date')}</span>
                         </div>
                       </div>
                     </li>

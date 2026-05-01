@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../hooks/useAuth';
+import { isTaskOverdue, formatDisplayDate } from '../utils/dateFormatter';
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -23,17 +25,7 @@ const Tasks = () => {
   const initialTaskState = { title: '', description: '', projectId: '', assignedToId: '', dueDate: '', status: 'TODO' };
   const [formData, setFormData] = useState(initialTaskState);
 
-  // Extract user info
-  const token = localStorage.getItem('token');
-  let currentUser = null;
-  if (token) {
-    try {
-      currentUser = JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
-      console.error('Failed to parse token');
-    }
-  }
-  const isAdmin = currentUser?.role === 'ADMIN';
+  const { user: currentUser, isAdmin } = useAuth();
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -147,15 +139,7 @@ const Tasks = () => {
     setFormData(initialTaskState);
   };
 
-  const isOverdue = (dueDate, status) => {
-    if (!dueDate || status === 'DONE') return false;
-    return new Date(dueDate) < new Date(new Date().setHours(0, 0, 0, 0));
-  };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
 
   return (
     <div className="space-y-6">
@@ -256,7 +240,7 @@ const Tasks = () => {
                 </tr>
               ) : (
                 tasks.map(task => {
-                  const overdue = isOverdue(task.dueDate, task.status);
+                  const overdue = isTaskOverdue(task.dueDate, task.status);
                   const canEditStatus = isAdmin || task.assignedToId === currentUser.userId;
 
                   return (
@@ -309,7 +293,7 @@ const Tasks = () => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           )}
-                          <span>{formatDate(task.dueDate)}</span>
+                          <span>{formatDisplayDate(task.dueDate)}</span>
                         </div>
                       </td>
                       {isAdmin && (

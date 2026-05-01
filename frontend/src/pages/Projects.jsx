@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../hooks/useAuth';
+import { formatDisplayDate } from '../utils/dateFormatter';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -9,17 +11,7 @@ const Projects = () => {
   const [newProject, setNewProject] = useState({ name: '', description: '' });
   const [error, setError] = useState('');
   
-  // Extract user info
-  const token = localStorage.getItem('token');
-  let user = null;
-  if (token) {
-    try {
-      user = JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
-      console.error('Failed to parse token');
-    }
-  }
-  const isAdmin = user?.role === 'ADMIN';
+  const { isAdmin } = useAuth();
 
   const fetchProjects = async () => {
     try {
@@ -70,10 +62,7 @@ const Projects = () => {
     return Math.round((doneTasks / tasks.length) * 100);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
+
 
   return (
     <div className="space-y-8">
@@ -133,7 +122,7 @@ const Projects = () => {
                   
                   <div className="mt-6 flex items-center justify-between text-xs text-gray-500">
                     <span className="font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full">{project._count?.tasks || 0} tasks</span>
-                    <span className="font-medium">Created {formatDate(project.createdAt)}</span>
+                    <span className="font-medium">Created {formatDisplayDate(project.createdAt, '')}</span>
                   </div>
 
                   <div className="mt-6">
