@@ -24,6 +24,8 @@ const Login = () => {
 
     try {
       const response = await api.post('/api/auth/login', { email, password });
+      console.log("Response:", response.data);
+
       if (response.data.success && response.data.data.token) {
         localStorage.setItem('token', response.data.data.token);
         navigate('/dashboard', { replace: true });
@@ -46,7 +48,7 @@ const Login = () => {
             Sign in to your account
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -64,7 +66,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1" htmlFor="password">
                 Password
@@ -131,7 +133,7 @@ const Login = () => {
               )}
             </button>
           </div>
-          
+
           <div className="text-center mt-4">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
