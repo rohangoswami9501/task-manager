@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const getStats = async (req, res) => {
+const getDashboardData = async (req, res) => {
   try {
     const { organizationId } = req.user;
     const today = new Date();
@@ -29,4 +29,4 @@ const getStats = async (req, res) => {
   }
 };
 
-module.exports = { getStats };
+module.exports = { getDashboardData };
