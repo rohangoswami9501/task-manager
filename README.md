@@ -41,30 +41,16 @@ cd ../frontend
 npm install
 ```
 
-### 2. Environment Configuration
+### 2. Database Setup
 
-Create a `.env` file in the `backend/` directory:
-```env
-PORT=5000
-DATABASE_URL="mysql://username:password@localhost:3306/taskflow"
-JWT_SECRET="your_super_secret_jwt_key_here"
-```
-
-Create a `.env` file in the `frontend/` directory:
-```env
-VITE_API_URL="http://localhost:5000"
-```
-
-### 3. Database Setup
-
-Ensure your MySQL database is running and the database specified in your `DATABASE_URL` exists. Then, push the schema to the database:
+Ensure your MySQL database is running and the database specified in your environment exists. Then, push the schema to the database:
 ```bash
 cd backend
 npx prisma generate
 npx prisma db push
 ```
 
-### 4. Start the Application
+### 3. Start the Application
 
 Start the backend server:
 ```bash
