@@ -17,6 +17,30 @@ const getAllProjects = async (req, res) => {
   }
 };
 
+const getProjectById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { organizationId } = req.user;
+
+    const project = await prisma.project.findFirst({
+      where: { id: parseInt(id), organizationId },
+      include: {
+        tasks: {
+          include: { assignedTo: { select: { name: true } } }
+        }
+      }
+    });
+
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Project not found' });
+    }
+
+    res.json({ success: true, data: project });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 const createProject = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -56,4 +80,4 @@ const deleteProject = async (req, res) => {
   }
 };
 
-module.exports = { getAllProjects, createProject, deleteProject };
+module.exports = { getAllProjects, getProjectById, createProject, deleteProject };
