@@ -1,80 +1,69 @@
-# 🚀 TaskFlow: Multi-Tenant SaaS Task Management
+# 🚀 TaskFlow: Multi-Tenant SaaS Platform
 
-A professional, full-stack multi-tenant task management application designed for organizations. Built to handle project tracking, task delegation, and role-based access across completely isolated organizational workspaces.
+![Live Deployment](https://img.shields.io/badge/Deployed_on-Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)
+![MySQL](https://img.shields.io/badge/Database-MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![React](https://img.shields.io/badge/Frontend-React_Vite-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 
-## ✨ Key Features
+TaskFlow is a production-ready, full-stack multi-tenant task management application. Currently deployed and fully hosted on **Railway**, it provides secure, isolated workspaces for different organizations to manage their projects and tasks efficiently.
 
-- **🏢 Multi-Tenant Architecture:** True SaaS design. Users create or join "Organizations". Data is strictly isolated—members of one organization can never access projects or tasks belonging to another.
-- **🔐 Intelligent Role-Based Access Control (RBAC):** 
-  - **Admins:** Can create projects, delegate tasks, delete content, and oversee all organization activity.
-  - **Members:** Can view organization projects and update the status of tasks specifically assigned to them.
-- **⚡ Bootstrap Admin Initialization:** The first user to register a new organization automatically becomes its Admin, eliminating the need for manual database manipulation to get started.
-- **📊 Interactive Dashboard:** A comprehensive overview of organization metrics, including total tasks, in-progress work, completed items, and critical overdue warnings.
-- **🎯 Advanced Task Management:** Filter tasks by project, assignee, or status. Visually track project completion rates with dynamic progress bars.
+## 🌐 Live Production Features
 
-## 🛠️ Technology Stack
+This application is built with a true Software-as-a-Service (SaaS) architecture, running live in the cloud:
 
-- **Frontend:** React, Vite, React Router, Tailwind CSS (Responsive, modern UI)
-- **Backend:** Node.js, Express.js (RESTful API architecture)
-- **Database:** MySQL, Prisma ORM (Type-safe database operations)
-- **Authentication:** JWT (JSON Web Tokens) & bcrypt (Secure password hashing)
-- **Deployment Strategy:** Configured for seamless cloud deployment (e.g., Railway)
+- **🏢 Multi-Tenant Workspaces:** Every organization has its own isolated bubble. Users from "Company A" will never see the projects, tasks, or members of "Company B", even though they share the same underlying database infrastructure.
+- **⚡ Automated Admin Bootstrapping:** When a user registers a completely new "Organization Name", the system instantly provisions a new workspace and grants them **ADMIN** rights. No manual database configuration is required.
+- **🔐 Dynamic RBAC (Role-Based Access Control):** 
+  - **Admins:** Have full CRUD (Create, Read, Update, Delete) permissions over projects and tasks within their organization.
+  - **Members:** Can view organization-wide projects but are restricted to updating the status of tasks specifically assigned to them.
+- **📊 Real-time Dashboard:** A dynamic analytics dashboard tracking total tasks, pending items, completed work, and critical overdue warnings.
+- **☁️ Cloud-Native Deployment:** Fully integrated with Railway. Automatic Prisma schema pushes run during the CI/CD build phase, ensuring the MySQL database is always perfectly synced with the backend models.
+
+## 🛠️ Production Tech Stack
+
+- **Cloud Infrastructure:** Railway (Hosting both the Node.js API and React Frontend)
+- **Database:** Railway MySQL Plugin
+- **Backend API:** Node.js, Express.js
+- **ORM:** Prisma (Type-safe database operations and automated schema migrations)
+- **Frontend:** React, Vite, Tailwind CSS
+- **Security:** JWT (JSON Web Tokens) for stateless authentication & bcrypt for password hashing.
 
 ---
 
-## 💻 Running Locally
+## 🚦 How to Use the Live App
 
-To get this application running on your local machine, ensure you have **Node.js** installed and a **MySQL** database running.
+Since the application is deployed, you don't need to run anything locally to test it.
 
-### 1. Clone & Install Dependencies
+1. **Create an Organization:** Go to the live Sign Up page. Enter a unique Organization Name. You will automatically become the **ADMIN**.
+2. **Invite Your Team:** Tell your colleagues to sign up using your *exact* Organization Name. They will automatically be added as **MEMBERs** to your workspace.
+3. **Manage Workflow:** As an admin, create Projects and start delegating Tasks to your team members. 
+
+---
+
+## 💻 Local Development Setup
+
+If you wish to run this codebase locally for development:
 
 ```bash
 git clone https://github.com/rohangoswami9501/task-manager.git
 cd task-manager
 
-# Install backend dependencies
-cd backend
-npm install
+# 1. Install Dependencies
+cd backend && npm install
+cd ../frontend && npm install
 
-# Install frontend dependencies
-cd ../frontend
-npm install
-```
+# 2. Setup Environment Variables
+# Add a .env in /backend with PORT, DATABASE_URL, and JWT_SECRET
+# Add a .env in /frontend with VITE_API_URL
 
-### 2. Database Setup
-
-Ensure your MySQL database is running and the database specified in your environment exists. Then, push the schema to the database:
-```bash
+# 3. Database Sync
 cd backend
 npx prisma generate
 npx prisma db push
+
+# 4. Start Servers
+npm start # inside /backend
+npm run dev # inside /frontend
 ```
-
-### 3. Start the Application
-
-Start the backend server:
-```bash
-cd backend
-npm start
-```
-
-Start the frontend development server (in a new terminal window):
-```bash
-cd frontend
-npm run dev
-```
-
-The application will be available at `http://localhost:5173`. 
 
 ---
-
-## 🚀 Getting Started (Testing Admin Features)
-
-Testing the administrative features locally is seamless:
-1. Open the application and navigate to **Sign Up**.
-2. Enter a **new** Organization Name along with your user details.
-3. Because you are the creator of this new organization, the system will automatically grant you **ADMIN** privileges.
-4. You can now create projects, and when colleagues sign up using your exact Organization Name, they will join as **MEMBERs** whom you can assign tasks to!
-
----
-*Built for efficient, secure, and scalable team collaboration.*
+*Architected for scale. Built for the cloud.*
