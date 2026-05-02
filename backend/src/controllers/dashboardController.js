@@ -22,7 +22,15 @@ const getDashboardData = async (req, res) => {
 
     res.json({
       success: true,
-      data: { total, todo, inProgress, done, overdue }
+      data: { 
+        totalTasks: total, 
+        byStatus: {
+          TODO: todo,
+          IN_PROGRESS: inProgress,
+          DONE: done
+        },
+        overdueTasks: overdue
+      }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
