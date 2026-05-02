@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": { //yad rakho
-    "start": "npx prisma db push --force-reset --accept-data-loss && node src/server.js",
-    "build": "npx prisma generate"
+  "scripts": {
+    "start": "node src/server.js",
+    "build": "npx prisma generate && npx prisma db push --force-reset --accept-data-loss"
   },
   "keywords": [],
   "author": "",
