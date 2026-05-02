@@ -1,13 +1,15 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-exports.getAllTasks = async (req, res) => {
+const getAllTasks = async (req, res) => {
   try {
-    const { status, projectId, assignedToId, overdue } = req.query;
-    
-    let where = {};
-    if (status) where.status = status;
+    const { organizationId } = req.user;
+    const { projectId, status, assignedToId, overdue } = req.query;
+
+    let where = { organizationId };
+
     if (projectId) where.projectId = parseInt(projectId);
+    if (status) where.status = status;
     if (assignedToId) where.assignedToId = parseInt(assignedToId);
     
     if (overdue === 'true') {
@@ -15,99 +17,86 @@ exports.getAllTasks = async (req, res) => {
       where.status = { not: 'DONE' };
     }
 
-    const tasks = await prisma.task.findMany({ 
+    const tasks = await prisma.task.findMany({
       where,
       include: {
         project: { select: { name: true } },
-        assignedTo: { select: { name: true, email: true } }
+        assignedTo: { select: { name: true } }
       },
       orderBy: { createdAt: 'desc' }
     });
+
     res.json({ success: true, data: tasks });
   } catch (error) {
-    console.error('Error fetching tasks:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-exports.createTask = async (req, res) => {
+const createTask = async (req, res) => {
   try {
-    const { title, description, dueDate, projectId, assignedToId } = req.body;
-    
-    if (!title || !projectId) {
-      return res.status(400).json({ success: false, message: 'Title and projectId are required' });
-    }
-    
+    const { organizationId } = req.user;
+    const { title, description, projectId, assignedToId, dueDate } = req.body;
+
     const task = await prisma.task.create({
       data: {
         title,
         description,
-        dueDate: dueDate ? new Date(dueDate) : null,
         projectId: parseInt(projectId),
-        assignedToId: assignedToId ? parseInt(assignedToId) : null
+        assignedToId: assignedToId ? parseInt(assignedToId) : null,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        organizationId
       }
     });
     res.status(201).json({ success: true, data: task });
   } catch (error) {
-    console.error('Error creating task:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-exports.updateTask = async (req, res) => {
+const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const taskId = parseInt(id);
-    const updates = req.body;
-    
-    const task = await prisma.task.findUnique({ where: { id: taskId } });
+    const { organizationId } = req.user;
+    const updateData = req.body;
+
+    // Security check: ensure task belongs to org
+    const task = await prisma.task.findFirst({
+      where: { id: parseInt(id), organizationId }
+    });
+
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
 
-    if (req.user.role === 'MEMBER') {
-      if (task.assignedToId !== req.user.userId) {
-        return res.status(403).json({ success: false, message: 'Forbidden. You can only update your assigned tasks.' });
-      }
-      
-      const { status } = updates;
-      if (!status) {
-         return res.status(400).json({ success: false, message: 'Members can only update task status.' });
-      }
-      
-      const updatedTask = await prisma.task.update({
-        where: { id: taskId },
-        data: { status }
-      });
-      return res.json({ success: true, data: updatedTask });
-    }
-
-    // ADMIN can update all fields
-    if (updates.dueDate) updates.dueDate = new Date(updates.dueDate);
-    if (updates.projectId) updates.projectId = parseInt(updates.projectId);
-    if (updates.assignedToId) updates.assignedToId = parseInt(updates.assignedToId);
+    if (updateData.dueDate) updateData.dueDate = new Date(updateData.dueDate);
+    if (updateData.projectId) updateData.projectId = parseInt(updateData.projectId);
+    if (updateData.assignedToId) updateData.assignedToId = parseInt(updateData.assignedToId);
 
     const updatedTask = await prisma.task.update({
-      where: { id: taskId },
-      data: updates
+      where: { id: parseInt(id) },
+      data: updateData
     });
+
     res.json({ success: true, data: updatedTask });
   } catch (error) {
-    console.error('Error updating task:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-exports.deleteTask = async (req, res) => {
+const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const taskId = parseInt(id);
-    
-    const task = await prisma.task.findUnique({ where: { id: taskId } });
+    const { organizationId } = req.user;
+
+    const task = await prisma.task.findFirst({
+      where: { id: parseInt(id), organizationId }
+    });
+
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
 
-    await prisma.task.delete({ where: { id: taskId } });
-    res.json({ success: true, message: 'Task deleted successfully' });
+    await prisma.task.delete({ where: { id: parseInt(id) } });
+    res.json({ success: true, message: 'Task deleted' });
   } catch (error) {
-    console.error('Error deleting task:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+
+module.exports = { getAllTasks, createTask, updateTask, deleteTask };

@@ -8,7 +8,8 @@ const Signup = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    orgName: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -32,6 +33,7 @@ const Signup = () => {
   const validate = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = 'Full name is required';
+    if (!formData.orgName.trim()) newErrors.orgName = 'Organization name is required';
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
@@ -66,7 +68,8 @@ const Signup = () => {
       const response = await api.post('/api/auth/signup', {
         name: formData.name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        orgName: formData.orgName
       });
       
       if (response.data.success && response.data.data.token) {
@@ -108,6 +111,22 @@ const Signup = () => {
                 onChange={handleChange}
               />
               {errors.name && <p className="mt-1 text-xs text-red-500 font-medium">{errors.name}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1" htmlFor="orgName">
+                Organization Name
+              </label>
+              <input
+                id="orgName"
+                name="orgName"
+                type="text"
+                className={`appearance-none relative block w-full px-4 py-3 border ${errors.orgName ? 'border-red-500' : 'border-gray-300'} placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all sm:text-sm`}
+                placeholder="Acme Corp"
+                value={formData.orgName}
+                onChange={handleChange}
+              />
+              {errors.orgName && <p className="mt-1 text-xs text-red-500 font-medium">{errors.orgName}</p>}
             </div>
 
             <div>

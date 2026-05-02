@@ -1,86 +1,59 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-exports.getAllProjects = async (req, res) => {
+const getAllProjects = async (req, res) => {
   try {
+    const { organizationId } = req.user;
     const projects = await prisma.project.findMany({
+      where: { organizationId },
       include: {
-        _count: {
-          select: { tasks: true }
-        },
-        createdBy: {
-          select: { name: true }
-        },
-        tasks: {
-          select: { status: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
+        _count: { select: { tasks: true } },
+        tasks: { select: { status: true } }
+      }
     });
     res.json({ success: true, data: projects });
   } catch (error) {
-    console.error('Error fetching projects:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-exports.createProject = async (req, res) => {
+const createProject = async (req, res) => {
   try {
     const { name, description } = req.body;
-    if (!name) {
-      return res.status(400).json({ success: false, message: 'Project name is required' });
-    }
+    const { organizationId } = req.user;
 
     const project = await prisma.project.create({
       data: {
         name,
         description,
-        createdById: req.user.userId
+        organizationId
       }
     });
     res.status(201).json({ success: true, data: project });
   } catch (error) {
-    console.error('Error creating project:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-exports.getProjectById = async (req, res) => {
+const deleteProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const project = await prisma.project.findUnique({
-      where: { id: parseInt(id) },
-      include: { tasks: true }
+    const { organizationId } = req.user;
+
+    // Ensure project belongs to the organization
+    const project = await prisma.project.findFirst({
+      where: { id: parseInt(id), organizationId }
     });
-    
-    if (!project) {
-      return res.status(404).json({ success: false, message: 'Project not found' });
-    }
-    
-    res.json({ success: true, data: project });
-  } catch (error) {
-    console.error('Error fetching project:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
-  }
-};
 
-exports.deleteProject = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const projectId = parseInt(id);
-    
-    const project = await prisma.project.findUnique({ where: { id: projectId } });
     if (!project) {
       return res.status(404).json({ success: false, message: 'Project not found' });
     }
 
-    // Cascade delete tasks manually since schema doesn't have onDelete: Cascade
-    await prisma.task.deleteMany({ where: { projectId } });
-    await prisma.project.delete({ where: { id: projectId } });
-
-    res.json({ success: true, message: 'Project and associated tasks deleted successfully' });
+    await prisma.project.delete({ where: { id: parseInt(id) } });
+    res.json({ success: true, message: 'Project deleted' });
   } catch (error) {
-    console.error('Error deleting project:', error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+
+module.exports = { getAllProjects, createProject, deleteProject };
