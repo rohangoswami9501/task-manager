@@ -7,6 +7,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import Tasks from './pages/Tasks';
+import Landing from './pages/Landing';
 
 import Layout from './components/Layout';
 
@@ -36,7 +37,7 @@ function App() {
           </ProtectedRoute>
         } />
         
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Landing />} />
       </Routes>
     </BrowserRouter>
   );
